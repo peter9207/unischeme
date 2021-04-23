@@ -29,22 +29,18 @@ type FunctionDeclaration struct {
 	Definition AST
 }
 
-type Identifier struct {
-	Name string
-}
-
-func Exec(program lexer.Program) (result int, err error) {
+func Exec(program lexer.Program) (result []ASTNode, err error) {
 
 	for _, e := range program.Expressions {
 
-		if e.Value != nil {
-			result = parseValue(e.Value)
+		var t ASTNode
+		t, err = parseExpression(e)
+		if err != nil {
 			return
 		}
 
-		if e.FnCall != nil {
+		result = append(result, t)
 
-		}
 	}
 
 	return
@@ -52,9 +48,31 @@ func Exec(program lexer.Program) (result int, err error) {
 
 var ErrParametersMustBeValues = errors.New("parameters must be values")
 var ErrUnknownValue = errors.New("unknown value type")
+var ErrUnknownExpression = errors.New("unknown expression")
 var ErrParametersMustBeIdentifiers = errors.New("parameters must be identifiers")
 
-func resolveFunctionCall(fn lexer.FnCall) (err error) {
+func parseExpression(e lexer.Expression) (result ASTNode, err error) {
+
+	if e.Value != nil {
+		result, err = parseValue(e.Value)
+		return
+	}
+
+	if e.Identifier != nil {
+		result, err = parseIdentifier(e.Identifier)
+		return
+	}
+
+	if e.FnCall != nil {
+		result, err = parseFunctionCall(e.FnCall)
+		return
+	}
+
+	err = ErrUnknownExpression
+	return
+}
+
+func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 
 	if fn.Name.Name == "def" {
 		if _, ok := globalScope[fn.Name.Name]; ok {
@@ -75,13 +93,15 @@ func resolveFunctionCall(fn lexer.FnCall) (err error) {
 			}
 			parameterList = append(parameterList, *p.Value.String)
 		}
-
-		// f := FunctionDeclaration{
-		// 	Name: fn.Name.Name,
-		// }
-
 	}
+	return
+}
 
+func parseIdentifier(v *lexer.Identifier) (node ASTNode, err error) {
+
+	node = Identifier{
+		Name: v.Name,
+	}
 	return
 }
 

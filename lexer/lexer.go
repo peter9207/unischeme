@@ -11,7 +11,7 @@ type Program struct {
 type Expression struct {
 	Value      *Value      `@@`
 	FnCall     *FnCall     `| @@`
-	Idnetifier *Identifier `| @@`
+	Identifier *Identifier `| @@`
 }
 
 type FnCall struct {
