@@ -23,26 +23,15 @@ type Function struct {
 	Tree   AST
 }
 
-type FunctionDeclaration struct {
-	Name       string
-	params     []string
-	Definition AST
-}
-
 func Exec(program lexer.Program) (result []ASTNode, err error) {
-
 	for _, e := range program.Expressions {
-
 		var t ASTNode
 		t, err = parseExpression(e)
 		if err != nil {
 			return
 		}
-
 		result = append(result, t)
-
 	}
-
 	return
 }
 
@@ -52,22 +41,18 @@ var ErrUnknownExpression = errors.New("unknown expression")
 var ErrParametersMustBeIdentifiers = errors.New("parameters must be identifiers")
 
 func parseExpression(e lexer.Expression) (result ASTNode, err error) {
-
 	if e.Value != nil {
 		result, err = parseValue(e.Value)
 		return
 	}
-
 	if e.Identifier != nil {
 		result, err = parseIdentifier(e.Identifier)
 		return
 	}
-
 	if e.FnCall != nil {
 		result, err = parseFunctionCall(e.FnCall)
 		return
 	}
-
 	err = ErrUnknownExpression
 	return
 }
