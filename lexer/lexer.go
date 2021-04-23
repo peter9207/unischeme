@@ -9,21 +9,24 @@ type Program struct {
 }
 
 type Expression struct {
-	// Name       string   `"(" @Ident`
-	// Parameters []Values `@@ ")"`
-	Value  *Value  `@@`
-	FnCall *FnCall `| @@`
+	Value      *Value      `@@`
+	FnCall     *FnCall     `| @@`
+	Idnetifier *Identifier `| @@`
 }
 
 type FnCall struct {
-	Name       string  `"(" @Ident`
-	Parameters []Value `@@* ")"`
+	Name       Identifier   `"(" @@`
+	Parameters []Expression `@@* ")"`
 }
 
 type Value struct {
 	String *string  `@String`
 	Float  *float64 `| @Float`
 	Int    *int     `| @Int`
+}
+
+type Identifier struct {
+	Name string `@Ident`
 }
 
 func Parse(data string) (p Program, err error) {
