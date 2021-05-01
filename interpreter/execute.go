@@ -2,6 +2,7 @@ package interpreter
 
 import "github.com/peter9207/unischeme/lexer"
 import "errors"
+import "fmt"
 
 var globalScope map[string]FunctionDeclaration
 
@@ -17,10 +18,19 @@ type AST struct {
 	Value    string
 }
 
-type Function struct {
-	Name   string
-	Params []string
-	Tree   AST
+type FunctionCall struct {
+	Name       string
+	Parameters []ASTNode
+}
+
+func (i FunctionCall) Node() interface{} {
+	return i
+}
+func (i FunctionCall) Type() string {
+	return "functionCall"
+}
+func (i FunctionCall) Children() []ASTNode {
+	return []ASTNode{}
 }
 
 func Exec(program lexer.Program) (result []ASTNode, err error) {
@@ -39,6 +49,7 @@ var ErrParametersMustBeValues = errors.New("parameters must be values")
 var ErrUnknownValue = errors.New("unknown value type")
 var ErrUnknownExpression = errors.New("unknown expression")
 var ErrParametersMustBeIdentifiers = errors.New("parameters must be identifiers")
+var ErrFnDeclarationWrongParameterCount = errors.New("function declaration should have 2 parameters")
 
 func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	if e.Value != nil {
@@ -57,14 +68,36 @@ func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	return
 }
 
+var ErrInvalidFnDecl = errors.New("invalid fn declaration")
+
 func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
+	fmt.Println("start parsing for funciton call")
 
 	if fn.Name.Name == "def" {
-		if _, ok := globalScope[fn.Name.Name]; ok {
-			err = errors.New("function already defined")
+
+		fmt.Println("fn declaration", len(fn.Parameters))
+
+		for _, v := range fn.Parameters {
+			fmt.Println(v)
+			fmt.Println(v.Identifier)
+			fmt.Printf("%T\n", v)
+
+		}
+
+		if len(fn.Parameters) != 2 {
+			err = ErrFnDeclarationWrongParameterCount
 			return
 		}
 
+		def := fn.Parameters[0]
+
+		if def.FnCall == nil {
+			err = ErrInvalidFnDecl
+			return
+		}
+
+		f := FunctionDeclaration{}
+		f.Name = def.FnCall.Name.Name
 		parameterList := []string{}
 		for i := 0; i < len(fn.Parameters); i++ {
 			p := fn.Parameters[i]
@@ -72,13 +105,33 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 				err = ErrParametersMustBeValues
 				return
 			}
-			if p.Value.String == nil {
-				err = ErrParametersMustBeIdentifiers
-				return
-			}
 			parameterList = append(parameterList, *p.Value.String)
 		}
+		f.Params = parameterList
+
+		block := fn.Parameters[1]
+		f.Definition, err = parseExpression(block)
+		if err != nil {
+			return
+		}
+
 	}
+
+	fnCall := FunctionCall{
+		Name: fn.Name.Name,
+	}
+
+	for _, exp := range fn.Parameters {
+
+		var n ASTNode
+		n, err = parseExpression(exp)
+		if err != nil {
+			return
+		}
+
+		fnCall.Parameters = append(fnCall.Parameters, n)
+	}
+
 	return
 }
 

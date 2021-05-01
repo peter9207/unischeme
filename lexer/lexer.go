@@ -9,8 +9,8 @@ type Program struct {
 }
 
 type Expression struct {
-	Value      *Value      `@@`
-	FnCall     *FnCall     `| @@`
+	FnCall     *FnCall     `@@`
+	Value      *Value      `| @@`
 	Identifier *Identifier `| @@`
 }
 

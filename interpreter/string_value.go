@@ -9,7 +9,7 @@ func (i StringValue) Node() interface{} {
 }
 
 func (i StringValue) Type() string {
-	return "string"
+	return "stringValue"
 }
 
 func (i StringValue) Children() []ASTNode {

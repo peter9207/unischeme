@@ -43,7 +43,7 @@ var _ = Describe("programs with 1 expression", func() {
 
 		It("Should parse the correct values", func() {
 			exp := p.Expressions[0]
-			Ω(exp.FnCall.Name).Should(Equal("foo"))
+			Ω(exp.FnCall.Name.Name).Should(Equal("foo"))
 
 			Ω(len(exp.FnCall.Parameters)).Should(Equal(1))
 			Ω(*exp.FnCall.Parameters[0].Value.Int).Should(Equal(1))
@@ -60,7 +60,7 @@ var _ = Describe("programs with 1 expression", func() {
 
 		It("Should parse the correct values", func() {
 			exp := p.Expressions[0]
-			Ω(exp.FnCall.Name).Should(Equal("foo"))
+			Ω(exp.FnCall.Name.Name).Should(Equal("foo"))
 
 			Ω(len(exp.FnCall.Parameters)).Should(Equal(2))
 			Ω(*exp.FnCall.Parameters[0].Value.Int).Should(Equal(1))
@@ -79,7 +79,7 @@ var _ = Describe("programs with 1 expression", func() {
 
 		It("Should parse the correct values", func() {
 			exp := p.Expressions[0]
-			Ω(exp.FnCall.Name).Should(Equal("foo"))
+			Ω(exp.FnCall.Name.Name).Should(Equal("foo"))
 
 			Ω(len(exp.FnCall.Parameters)).Should(Equal(2))
 			Ω(*exp.FnCall.Parameters[0].Value.Int).Should(Equal(1))
@@ -99,12 +99,12 @@ var _ = Describe("programs with 1 expression", func() {
 
 		It("Should parse the correct values", func() {
 			exp := p.Expressions[0]
-			Ω(exp.FnCall.Name).Should(Equal("foo"))
+			Ω(exp.FnCall.Name.Name).Should(Equal("foo"))
 
 			intVal := 1
 			expected := lexer.Expression{
 				FnCall: &lexer.FnCall{
-					Name: "foo",
+					Name: lexer.Identifier{Name: "foo"},
 					Parameters: []lexer.Expression{
 						{
 							Value: &lexer.Value{
@@ -113,7 +113,7 @@ var _ = Describe("programs with 1 expression", func() {
 						},
 						{
 							FnCall: &lexer.FnCall{
-								Name: "bar",
+								Name: lexer.Identifier{Name: "bar"},
 								Parameters: []lexer.Expression{
 									{
 

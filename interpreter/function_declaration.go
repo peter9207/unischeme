@@ -2,8 +2,8 @@ package interpreter
 
 type FunctionDeclaration struct {
 	Name       string
-	params     []string
-	Definition AST
+	Params     []string
+	Definition ASTNode
 }
 
 func (f FunctionDeclaration) Node() interface{} {
