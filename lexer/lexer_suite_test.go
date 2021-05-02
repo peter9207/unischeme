@@ -88,7 +88,6 @@ var _ = Describe("programs with 1 expression", func() {
 	})
 
 	Describe("nested function calls", func() {
-
 		p, err := lexer.Parse("(foo 1 (bar 1))")
 		It("should not return errors", func() {
 			Ω(err).Should(BeNil())
@@ -130,6 +129,48 @@ var _ = Describe("programs with 1 expression", func() {
 
 			Ω(exp).Should(Equal(expected))
 		})
+		Describe("function delcarations", func() {
+			p, err := lexer.Parse("(def (bar i) 5)")
+			It("should not return errors", func() {
+				Ω(err).Should(BeNil())
+			})
+			It("should parse the correct amount of expressiosn", func() {
+				Ω(len(p.Expressions)).Should(Equal(1))
+			})
 
+			It("Should parse the correct values", func() {
+				exp := p.Expressions[0]
+				Ω(exp.FnCall.Name.Name).Should(Equal("def"))
+
+				intVal := 5
+
+				expected := lexer.Expression{
+					FnCall: &lexer.FnCall{
+						Name: lexer.Identifier{Name: "def"},
+						Parameters: []lexer.Expression{
+							{
+								FnCall: &lexer.FnCall{
+									Name: lexer.Identifier{Name: "bar"},
+									Parameters: []lexer.Expression{
+										{
+											Identifier: &lexer.Identifier{
+												Name: "i",
+											},
+										},
+									},
+								},
+							},
+							{
+								Value: &lexer.Value{
+									Int: &intVal,
+								},
+							},
+						},
+					},
+				}
+
+				Ω(exp).Should(Equal(expected))
+			})
+		})
 	})
 })

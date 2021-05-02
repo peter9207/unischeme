@@ -49,11 +49,11 @@ var _ = Describe("Execute", func() {
 			Ω(len(nodes)).Should(Equal(1))
 
 			n := nodes[0]
-			Ω(n.Type()).Should(Equal("stringValue"))
+			Ω(n.Type()).Should(Equal("functionDeclaration"))
 			fnNode, ok := n.(interpreter.FunctionDeclaration)
 			Ω(ok).Should(Equal(true))
 			Ω(fnNode.Name).Should(Equal("foo"))
-			Ω(len(fnNode.Params)).Should(Equal("foo"))
+			Ω(len(fnNode.Params)).Should(Equal(1))
 			p := fnNode.Params[0]
 			Ω(p).Should(Equal("i"))
 
