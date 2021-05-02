@@ -2,7 +2,8 @@ package interpreter
 
 import "github.com/peter9207/unischeme/lexer"
 import "errors"
-import "fmt"
+
+// import "fmt"
 
 var globalScope map[string]FunctionDeclaration
 
@@ -19,8 +20,8 @@ type AST struct {
 }
 
 type FunctionCall struct {
-	Name       string
-	Parameters []ASTNode
+	Name   string
+	Params []ASTNode
 }
 
 func (i FunctionCall) Node() interface{} {
@@ -45,11 +46,11 @@ func Exec(program lexer.Program) (result []ASTNode, err error) {
 	return
 }
 
-var ErrParametersMustBeValues = errors.New("parameters must be values")
 var ErrUnknownValue = errors.New("unknown value type")
 var ErrUnknownExpression = errors.New("unknown expression")
 var ErrParametersMustBeIdentifiers = errors.New("parameters must be identifiers")
 var ErrFnDeclarationWrongParameterCount = errors.New("function declaration should have 2 parameters")
+var ErrInvalidFnDecl = errors.New("invalid fn declaration")
 
 func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	if e.Value != nil {
@@ -68,44 +69,39 @@ func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	return
 }
 
-var ErrInvalidFnDecl = errors.New("invalid fn declaration")
+func parseFunctionDeclaration(fn *lexer.FnCall) (f FunctionDeclaration, err error) {
+	if len(fn.Parameters) != 2 {
+		err = ErrFnDeclarationWrongParameterCount
+		return
+	}
+
+	def := fn.Parameters[0]
+
+	if def.FnCall == nil {
+		err = ErrInvalidFnDecl
+		return
+	}
+
+	f.Name = def.FnCall.Name.Name
+	parameterList := []string{}
+	for _, p := range def.FnCall.Parameters {
+		if p.Identifier == nil {
+			err = ErrParametersMustBeIdentifiers
+			return
+		}
+		parameterList = append(parameterList, p.Identifier.Name)
+	}
+	f.Params = parameterList
+
+	block := fn.Parameters[1]
+	f.Definition, err = parseExpression(block)
+
+	return
+}
 
 func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
-	fmt.Println("start parsing for funciton call")
-
 	if fn.Name.Name == "def" {
-		if len(fn.Parameters) != 2 {
-			err = ErrFnDeclarationWrongParameterCount
-			return
-		}
-
-		def := fn.Parameters[0]
-
-		if def.FnCall == nil {
-			err = ErrInvalidFnDecl
-			return
-		}
-
-		f := FunctionDeclaration{}
-		f.Name = def.FnCall.Name.Name
-		parameterList := []string{}
-		for _, p := range def.FnCall.Parameters {
-			fmt.Println(p)
-			if p.Identifier == nil {
-				err = ErrParametersMustBeIdentifiers
-				return
-			}
-			parameterList = append(parameterList, p.Identifier.Name)
-		}
-		f.Params = parameterList
-
-		fmt.Println("got here")
-		block := fn.Parameters[1]
-		f.Definition, err = parseExpression(block)
-		if err != nil {
-			return
-		}
-		node = f
+		node, err = parseFunctionDeclaration(fn)
 		return
 	}
 
@@ -121,7 +117,7 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 			return
 		}
 
-		fnCall.Parameters = append(fnCall.Parameters, n)
+		fnCall.Params = append(fnCall.Params, n)
 	}
 
 	node = fnCall
@@ -129,7 +125,6 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 }
 
 func parseIdentifier(v *lexer.Identifier) (node ASTNode, err error) {
-
 	node = Identifier{
 		Name: v.Name,
 	}

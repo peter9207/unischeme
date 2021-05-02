@@ -41,7 +41,6 @@ var _ = Describe("Execute", func() {
 		})
 
 		It("can parse function delcarations", func() {
-
 			program, err := lexer.Parse(`(def (foo i) 5)`)
 			Ω(err).Should(BeNil())
 			nodes, err := interpreter.Exec(program)
@@ -56,7 +55,24 @@ var _ = Describe("Execute", func() {
 			Ω(len(fnNode.Params)).Should(Equal(1))
 			p := fnNode.Params[0]
 			Ω(p).Should(Equal("i"))
+		})
 
+		It("can parse function calls", func() {
+			program, err := lexer.Parse(`(foo i)`)
+			Ω(err).Should(BeNil())
+			nodes, err := interpreter.Exec(program)
+			Ω(err).Should(BeNil())
+			Ω(len(nodes)).Should(Equal(1))
+			n := nodes[0]
+			Ω(n.Type()).Should(Equal("functionCall"))
+			fnNode, ok := n.(interpreter.FunctionCall)
+			Ω(ok).Should(Equal(true))
+			Ω(fnNode.Name).Should(Equal("foo"))
+			Ω(len(fnNode.Params)).Should(Equal(1))
+			p := fnNode.Params[0]
+			param, ok := p.(interpreter.Identifier)
+			Ω(ok).Should(Equal(true))
+			Ω(param.Name).Should(Equal("i"))
 		})
 	})
 
