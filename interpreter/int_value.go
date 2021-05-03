@@ -1,12 +1,12 @@
 package interpreter
 
+import (
+	"fmt"
+)
+
 type IntValue struct {
 	Value int
 }
-
-// func (i IntValue) Value() interface{} {
-// 	return i.Value
-// }
 
 func (i IntValue) Node() interface{} {
 	return i
@@ -18,4 +18,8 @@ func (i IntValue) Type() string {
 
 func (i IntValue) Children() []ASTNode {
 	return []ASTNode{}
+}
+
+func (i IntValue) String() string {
+	return fmt.Sprintf("%v", i.Value)
 }

@@ -8,72 +8,32 @@ import (
 	"github.com/peter9207/unischeme/lexer"
 )
 
-var _ = Describe("Parsing lexer to AST", func() {
+var _ = Describe("Simple Exec", func() {
 
-	Describe("can execute simple functions", func() {
+	Describe("Simple values", func() {
 
-		It("can parse integer values", func() {
+		It("should parse function with just int values", func() {
 			program, err := lexer.Parse("5")
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.ToAST(program)
+			values, err := interpreter.Exec(program)
 			Ω(err).Should(BeNil())
-			Ω(len(nodes)).Should(Equal(1))
 
-			n := nodes[0]
-			Ω(n.Type()).Should(Equal("intValue"))
-			intNode, ok := n.(interpreter.IntValue)
-			Ω(ok).Should(Equal(true))
-			Ω(intNode.Value).Should(Equal(5))
+			Ω(len(values)).Should(Equal(1))
+			v := values[0]
+			Ω(v).Should(Equal("5"))
 		})
 
-		It("can parse string values", func() {
-			program, err := lexer.Parse(`"some string"`)
+		It("should parse function with just string values", func() {
+			program, err := lexer.Parse(`"some_string"`)
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.ToAST(program)
+			values, err := interpreter.Exec(program)
 			Ω(err).Should(BeNil())
-			Ω(len(nodes)).Should(Equal(1))
 
-			n := nodes[0]
-			Ω(n.Type()).Should(Equal("stringValue"))
-			intNode, ok := n.(interpreter.StringValue)
-			Ω(ok).Should(Equal(true))
-			Ω(intNode.Value).Should(Equal("some string"))
+			Ω(len(values)).Should(Equal(1))
+			v := values[0]
+			Ω(v).Should(Equal("some_string"))
 		})
 
-		It("can parse function delcarations", func() {
-			program, err := lexer.Parse(`(def (foo i) 5)`)
-			Ω(err).Should(BeNil())
-			nodes, err := interpreter.ToAST(program)
-			Ω(err).Should(BeNil())
-			Ω(len(nodes)).Should(Equal(1))
-
-			n := nodes[0]
-			Ω(n.Type()).Should(Equal("functionDeclaration"))
-			fnNode, ok := n.(interpreter.FunctionDeclaration)
-			Ω(ok).Should(Equal(true))
-			Ω(fnNode.Name).Should(Equal("foo"))
-			Ω(len(fnNode.Params)).Should(Equal(1))
-			p := fnNode.Params[0]
-			Ω(p).Should(Equal("i"))
-		})
-
-		It("can parse function calls", func() {
-			program, err := lexer.Parse(`(foo i)`)
-			Ω(err).Should(BeNil())
-			nodes, err := interpreter.ToAST(program)
-			Ω(err).Should(BeNil())
-			Ω(len(nodes)).Should(Equal(1))
-			n := nodes[0]
-			Ω(n.Type()).Should(Equal("functionCall"))
-			fnNode, ok := n.(interpreter.FunctionCall)
-			Ω(ok).Should(Equal(true))
-			Ω(fnNode.Name).Should(Equal("foo"))
-			Ω(len(fnNode.Params)).Should(Equal(1))
-			p := fnNode.Params[0]
-			param, ok := p.(interpreter.Identifier)
-			Ω(ok).Should(Equal(true))
-			Ω(param.Name).Should(Equal("i"))
-		})
 	})
 
 })

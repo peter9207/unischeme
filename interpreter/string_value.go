@@ -15,3 +15,7 @@ func (i StringValue) Type() string {
 func (i StringValue) Children() []ASTNode {
 	return []ASTNode{}
 }
+
+func (i StringValue) String() string {
+	return i.Value
+}
