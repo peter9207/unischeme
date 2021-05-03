@@ -8,14 +8,14 @@ import (
 	"github.com/peter9207/unischeme/lexer"
 )
 
-var _ = Describe("Execute", func() {
+var _ = Describe("Parsing lexer to AST", func() {
 
 	Describe("can execute simple functions", func() {
 
 		It("can parse integer values", func() {
 			program, err := lexer.Parse("5")
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.Exec(program)
+			nodes, err := interpreter.ToAST(program)
 			Ω(err).Should(BeNil())
 			Ω(len(nodes)).Should(Equal(1))
 
@@ -29,7 +29,7 @@ var _ = Describe("Execute", func() {
 		It("can parse string values", func() {
 			program, err := lexer.Parse(`"some string"`)
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.Exec(program)
+			nodes, err := interpreter.ToAST(program)
 			Ω(err).Should(BeNil())
 			Ω(len(nodes)).Should(Equal(1))
 
@@ -43,7 +43,7 @@ var _ = Describe("Execute", func() {
 		It("can parse function delcarations", func() {
 			program, err := lexer.Parse(`(def (foo i) 5)`)
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.Exec(program)
+			nodes, err := interpreter.ToAST(program)
 			Ω(err).Should(BeNil())
 			Ω(len(nodes)).Should(Equal(1))
 
@@ -60,7 +60,7 @@ var _ = Describe("Execute", func() {
 		It("can parse function calls", func() {
 			program, err := lexer.Parse(`(foo i)`)
 			Ω(err).Should(BeNil())
-			nodes, err := interpreter.Exec(program)
+			nodes, err := interpreter.ToAST(program)
 			Ω(err).Should(BeNil())
 			Ω(len(nodes)).Should(Equal(1))
 			n := nodes[0]
