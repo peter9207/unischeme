@@ -19,3 +19,7 @@ func (i StringValue) Children() []ASTNode {
 func (i StringValue) String() string {
 	return i.Value
 }
+
+func (i StringValue) Resolve() string {
+	return i.String()
+}
