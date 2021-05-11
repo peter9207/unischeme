@@ -79,8 +79,8 @@ func eval(t ASTNode, scope map[string]Expression, functionScope map[string]Funct
 
 func Eval(ast []ASTNode) (results []string, err error) {
 
-	var scope map[string]Expression
-	var fnScope map[string]FunctionDeclaration
+	scope := map[string]Expression{}
+	fnScope := map[string]FunctionDeclaration{}
 
 	for _, t := range ast {
 		var r []string
