@@ -6,8 +6,8 @@ import (
 )
 
 type FunctionCall struct {
-	Name   string
-	Params []Expression
+	Name   string       `json:"name"`
+	Params []Expression `json:"params"`
 }
 
 func (i FunctionCall) Node() interface{} {
@@ -70,11 +70,10 @@ func (fn FunctionCall) resolvePlus(scope map[string]Expression, functionScope ma
 func (fn FunctionCall) resolveMinus(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
 
 	if len(fn.Params) != 2 {
-		err = fmt.Errorf("wrong number of arguments for plus %d", len(fn.Params))
+		err = fmt.Errorf("wrong number of arguments for subtract %d", len(fn.Params))
 		return
 	}
 
-	// v1 := fn.Params[0]
 	v1, err := fn.Params[0].Resolve(scope, functionScope)
 	n1, ok := v1.(IntValue)
 	if !ok {
@@ -82,7 +81,6 @@ func (fn FunctionCall) resolveMinus(scope map[string]Expression, functionScope m
 		return
 	}
 
-	// v2 := fn.Params[1]
 	v2, err := fn.Params[1].Resolve(scope, functionScope)
 	n2, ok := v2.(IntValue)
 	if !ok {

@@ -1,9 +1,9 @@
 package interpreter
 
 type FunctionDeclaration struct {
-	Name       string
-	Params     []string
-	Definition Expression
+	Name       string     `json:"name"`
+	Params     []string   `json:"params"`
+	Definition Expression `json:"definition"`
 }
 
 func (f FunctionDeclaration) Node() interface{} {

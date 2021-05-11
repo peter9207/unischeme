@@ -5,7 +5,7 @@ import (
 )
 
 type IntValue struct {
-	Value int
+	Value int `json:"value"`
 }
 
 func (i IntValue) Node() interface{} {

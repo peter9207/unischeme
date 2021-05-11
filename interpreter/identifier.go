@@ -1,7 +1,7 @@
 package interpreter
 
 type Identifier struct {
-	Name string
+	Name string `json:"name"`
 }
 
 func (i Identifier) Node() interface{} {

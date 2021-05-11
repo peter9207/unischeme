@@ -1,7 +1,7 @@
 package interpreter
 
 type StringValue struct {
-	Value string
+	Value string `json:"value"`
 }
 
 func (i StringValue) Node() interface{} {
