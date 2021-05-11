@@ -30,6 +30,24 @@ var _ = Describe("FunctionCall", func() {
 			Ω(v.String()).Should(Equal("2"))
 		})
 
+		It("minus", func() {
+
+			f := interpreter.FunctionCall{
+				Name: "subtract",
+				Params: []interpreter.Expression{
+					interpreter.IntValue{
+						Value: 5,
+					},
+					interpreter.IntValue{
+						Value: 1,
+					},
+				},
+			}
+
+			v, err := f.Resolve(map[string]interpreter.Expression{}, map[string]interpreter.FunctionDeclaration{})
+			Ω(err).Should(BeNil())
+			Ω(v.String()).Should(Equal("4"))
+		})
 	})
 
 })
