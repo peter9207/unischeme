@@ -14,10 +14,11 @@ func ToAST(expressions []lexer.Expression) (result []ASTNode, err error) {
 		var t ASTNode
 
 		if e.FnCall != nil {
-			// if e.FnCall != nil {
-			// 	result, err = parseFunctionCall(e.FnCall)
-			// 	return
-			// }
+			t, err = parseFunctionCall(e.FnCall)
+			if err != nil {
+				return
+			}
+			result = append(result, t)
 			continue
 		}
 
