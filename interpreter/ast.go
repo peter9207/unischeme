@@ -12,6 +12,15 @@ var ErrInvalidFnDecl = errors.New("invalid fn declaration")
 func ToAST(expressions []lexer.Expression) (result []ASTNode, err error) {
 	for _, e := range expressions {
 		var t ASTNode
+
+		if e.FnCall != nil {
+			// if e.FnCall != nil {
+			// 	result, err = parseFunctionCall(e.FnCall)
+			// 	return
+			// }
+			continue
+		}
+
 		t, err = parseExpression(e)
 		if err != nil {
 			return
@@ -21,7 +30,7 @@ func ToAST(expressions []lexer.Expression) (result []ASTNode, err error) {
 	return
 }
 
-func parseExpression(e lexer.Expression) (result ASTNode, err error) {
+func parseExpression(e lexer.Expression) (result Expression, err error) {
 	if e.Value != nil {
 		result, err = parseValue(e.Value)
 		return
@@ -30,10 +39,7 @@ func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 		result, err = parseIdentifier(e.Identifier)
 		return
 	}
-	if e.FnCall != nil {
-		result, err = parseFunctionCall(e.FnCall)
-		return
-	}
+
 	err = ErrUnknownExpression
 	return
 }
@@ -64,6 +70,7 @@ func parseFunctionDeclaration(fn *lexer.FnCall) (f FunctionDeclaration, err erro
 
 	block := fn.Parameters[1]
 	f.Definition, err = parseExpression(block)
+	// f.Definition = block
 
 	return
 }
@@ -80,7 +87,7 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 
 	for _, exp := range fn.Parameters {
 
-		var n ASTNode
+		var n Expression
 		n, err = parseExpression(exp)
 		if err != nil {
 			return
@@ -93,14 +100,14 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 	return
 }
 
-func parseIdentifier(v *lexer.Identifier) (node ASTNode, err error) {
+func parseIdentifier(v *lexer.Identifier) (node Expression, err error) {
 	node = Identifier{
 		Name: v.Name,
 	}
 	return
 }
 
-func parseValue(v *lexer.Value) (node ASTNode, err error) {
+func parseValue(v *lexer.Value) (node Expression, err error) {
 
 	if v.Int != nil {
 		node = IntValue{

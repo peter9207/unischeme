@@ -20,6 +20,6 @@ func (i StringValue) String() string {
 	return i.Value
 }
 
-func (i StringValue) Resolve() string {
-	return i.String()
+func (i StringValue) Resolve(_ map[string]Expression, _ map[string]FunctionDeclaration) (Value, error) {
+	return i, nil
 }

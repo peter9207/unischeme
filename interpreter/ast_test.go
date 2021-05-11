@@ -12,7 +12,7 @@ var _ = Describe("Parsing lexer to AST", func() {
 
 	Describe("can execute simple functions", func() {
 
-		It("can parse integer values", func() {
+		XIt("can parse integer values", func() {
 			program, err := lexer.Parse("5")
 			Ω(err).Should(BeNil())
 			nodes, err := interpreter.ToAST(program.Expressions)
@@ -26,7 +26,7 @@ var _ = Describe("Parsing lexer to AST", func() {
 			Ω(intNode.Value).Should(Equal(5))
 		})
 
-		It("can parse string values", func() {
+		XIt("can parse string values", func() {
 			program, err := lexer.Parse(`"some string"`)
 			Ω(err).Should(BeNil())
 			nodes, err := interpreter.ToAST(program.Expressions)
@@ -57,7 +57,7 @@ var _ = Describe("Parsing lexer to AST", func() {
 			Ω(p).Should(Equal("i"))
 		})
 
-		It("can parse function calls", func() {
+		XIt("can parse function calls", func() {
 			program, err := lexer.Parse(`(foo i)`)
 			Ω(err).Should(BeNil())
 			nodes, err := interpreter.ToAST(program.Expressions)

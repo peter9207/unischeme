@@ -14,7 +14,7 @@ func (i Identifier) Children() []ASTNode {
 	return []ASTNode{}
 }
 
-func (i Identifier) Resolve(scope map[string]ASTNode) (value Value, err error) {
+func (i Identifier) Resolve(scope map[string]Expression, _ map[string]FunctionDeclaration) (value Value, err error) {
 
 	name := i.Name
 	declared, ok := scope[name]

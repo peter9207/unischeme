@@ -24,6 +24,6 @@ func (i IntValue) String() string {
 	return fmt.Sprintf("%v", i.Value)
 }
 
-func (i IntValue) Resolve() string {
-	return i.String()
+func (i IntValue) Resolve(_ map[string]Expression, _ map[string]FunctionDeclaration) (Value, error) {
+	return i, nil
 }

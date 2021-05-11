@@ -7,21 +7,25 @@ import (
 )
 
 type ASTNode interface {
-	Node() interface{}
+	// Node() interface{}
 	Type() string
-	Children() []ASTNode
+	// Children() []ASTNode
 }
 
 type Expression interface {
-	Resolve(scope map[string]ASTNode) (Value, error)
+	Resolve(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (Value, error)
+	Type() string
 }
 
 type Statement interface {
 	Perform(scope map[string]ASTNode) error
+	Type() string
 }
 
 type Value interface {
 	String() string
+	Type() string
+	Resolve(map[string]Expression, map[string]FunctionDeclaration) (Value, error)
 }
 
 func Exec(program lexer.Program) (result []string, err error) {
@@ -43,27 +47,9 @@ func evalFunctionDeclaration(fn FunctionDeclaration, scope map[string]ASTNode) (
 	return
 }
 
-func evalFunctionCall(fn FunctionCall, scope map[string]ASTNode) (value string, err error) {
-	name := fn.Name
-	declared, ok := scope[name]
-	if !ok {
-		err = ErrUndefinedIdentifier
-		return
-	}
-
-	return
-}
-
-func eval(t ASTNode, scope map[string]ASTNode) (results []string, err error) {
+func eval(t ASTNode, scope map[string]Expression, functionScope map[string]FunctionDeclaration) (results []string, err error) {
 	switch t.(type) {
-	case IntValue:
-		result, ok := t.(Value)
-		if !ok {
-			err = ErrCannotParseValue
-			return
-		}
-		results = append(results, result.String())
-	case StringValue:
+	case IntValue, StringValue:
 		result, ok := t.(Value)
 		if !ok {
 			err = ErrCannotParseValue
@@ -73,16 +59,17 @@ func eval(t ASTNode, scope map[string]ASTNode) (results []string, err error) {
 
 	case FunctionDeclaration:
 		fn := t.(FunctionDeclaration)
-		scope[fn.Name] = fn
+		functionScope[fn.Name] = fn
 
 	case FunctionCall:
 		fn := t.(FunctionCall)
-		name := fn.Name
-		declared, ok := scope[name]
-		if !ok {
-			err = ErrUndefinedIdentifier
+		var v Value
+		v, err = fn.Resolve(scope, functionScope)
+		if err != nil {
 			return
 		}
+
+		results = append(results, v.String())
 
 	default:
 		fmt.Printf("unknown ast syntax %T, skipping...\n", t)
@@ -92,11 +79,16 @@ func eval(t ASTNode, scope map[string]ASTNode) (results []string, err error) {
 
 func Eval(ast []ASTNode) (results []string, err error) {
 
-	var scope map[string]FunctionDeclaration
+	var scope map[string]Expression
+	var fnScope map[string]FunctionDeclaration
 
 	for _, t := range ast {
-		r, err := eval(t, scope)
-		results = append(results, r)
+		var r []string
+		r, err = eval(t, scope, fnScope)
+		if err != nil {
+			return
+		}
+		results = append(results, r...)
 	}
 
 	return
