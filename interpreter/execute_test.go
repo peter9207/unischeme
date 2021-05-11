@@ -56,4 +56,29 @@ var _ = Describe("Simple Exec", func() {
 
 	})
 
+	Describe("simple builtin functions", func() {
+		It("can exec function delcarations with simple values 2 functions", func() {
+			program, err := lexer.Parse(`(def (foo i) (plus i 2)) (foo 2)`)
+
+			Ω(err).Should(BeNil())
+			value, err := interpreter.Exec(program)
+			Ω(err).Should(BeNil())
+			Ω(len(value)).Should(Equal(1))
+			Ω(value[0]).Should(Equal("4"))
+
+		})
+
+		It("add and subtract with functions", func() {
+			program, err := lexer.Parse(`(def (foo i) (plus i 2)) (def (bar i) (subtract i 1)) (foo (bar 5))`)
+
+			Ω(err).Should(BeNil())
+			value, err := interpreter.Exec(program)
+			Ω(err).Should(BeNil())
+			Ω(len(value)).Should(Equal(1))
+			Ω(value[0]).Should(Equal("6"))
+
+		})
+
+	})
+
 })

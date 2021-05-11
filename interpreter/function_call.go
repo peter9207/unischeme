@@ -74,17 +74,19 @@ func (fn FunctionCall) resolveMinus(scope map[string]Expression, functionScope m
 		return
 	}
 
-	v1 := fn.Params[0]
+	// v1 := fn.Params[0]
+	v1, err := fn.Params[0].Resolve(scope, functionScope)
 	n1, ok := v1.(IntValue)
 	if !ok {
-		err = fmt.Errorf("wrong argument type for plus %T", v1)
+		err = fmt.Errorf("wrong argument type for subtract %T", v1)
 		return
 	}
 
-	v2 := fn.Params[1]
+	// v2 := fn.Params[1]
+	v2, err := fn.Params[1].Resolve(scope, functionScope)
 	n2, ok := v2.(IntValue)
 	if !ok {
-		err = fmt.Errorf("wrong argument type for plus %T", v1)
+		err = fmt.Errorf("wrong argument type for subtract %T", v1)
 		return
 	}
 	value = IntValue{
@@ -97,7 +99,7 @@ func (fn FunctionCall) resolve(scope map[string]Expression, functionScope map[st
 	name := fn.Name
 	declared, ok := functionScope[name]
 	if !ok {
-		err = ErrUndefinedIdentifier
+		err = fmt.Errorf("unindentifier identifier %s", name)
 		return
 	}
 
