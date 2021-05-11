@@ -1,7 +1,10 @@
 package interpreter
 
-import "github.com/peter9207/unischeme/lexer"
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"github.com/peter9207/unischeme/lexer"
+)
 
 var ErrUnknownValue = errors.New("unknown value type")
 var ErrUnknownExpression = errors.New("unknown expression")
@@ -31,7 +34,7 @@ func ToAST(expressions []lexer.Expression) (result []ASTNode, err error) {
 	return
 }
 
-func parseExpression(e lexer.Expression) (result Expression, err error) {
+func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	if e.Value != nil {
 		result, err = parseValue(e.Value)
 		return
@@ -41,7 +44,12 @@ func parseExpression(e lexer.Expression) (result Expression, err error) {
 		return
 	}
 
-	err = ErrUnknownExpression
+	if e.FnCall != nil {
+		result, err = parseFunctionCall(e.FnCall)
+		return
+	}
+
+	err = fmt.Errorf("unknown expression %T", e)
 	return
 }
 
@@ -69,9 +77,13 @@ func parseFunctionDeclaration(fn *lexer.FnCall) (f FunctionDeclaration, err erro
 	}
 	f.Params = parameterList
 
-	block := fn.Parameters[1]
-	f.Definition, err = parseExpression(block)
-	// f.Definition = block
+	block, err := parseExpression(fn.Parameters[1])
+	blockExp, ok := block.(Expression)
+	if !ok {
+		err = errors.New("function block must be an expression")
+	}
+
+	f.Definition = blockExp
 
 	return
 }
@@ -88,13 +100,17 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 
 	for _, exp := range fn.Parameters {
 
-		var n Expression
-		n, err = parseExpression(exp)
+		a, err := parseExpression(exp)
 		if err != nil {
-			return
+			return nil, err
+		}
+		expression, ok := a.(Expression)
+		if !ok {
+			err = errors.New("parameters must be expressions")
+			return nil, err
 		}
 
-		fnCall.Params = append(fnCall.Params, n)
+		fnCall.Params = append(fnCall.Params, expression)
 	}
 
 	node = fnCall

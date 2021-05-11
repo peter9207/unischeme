@@ -7,9 +7,7 @@ import (
 )
 
 type ASTNode interface {
-	// Node() interface{}
 	Type() string
-	// Children() []ASTNode
 }
 
 type Expression interface {
@@ -35,7 +33,6 @@ func Exec(program lexer.Program) (result []string, err error) {
 	}
 
 	result, err = Eval(ast)
-
 	return
 }
 

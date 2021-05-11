@@ -32,6 +32,28 @@ var _ = Describe("Simple Exec", func() {
 
 		})
 
+		It("can exec function delcarations with simple values 2 functions", func() {
+			program, err := lexer.Parse(`(def (foo i) i) (def (bar j) j) (foo (bar 2))`)
+
+			Ω(err).Should(BeNil())
+			value, err := interpreter.Exec(program)
+			Ω(err).Should(BeNil())
+			Ω(len(value)).Should(Equal(1))
+			Ω(value[0]).Should(Equal("2"))
+
+		})
+
+		It("can exec function delcarations with simple values 2 functions", func() {
+			program, err := lexer.Parse(`(def (foo i) i) (def (bar j) j) (foo (bar 2))`)
+
+			Ω(err).Should(BeNil())
+			value, err := interpreter.Exec(program)
+			Ω(err).Should(BeNil())
+			Ω(len(value)).Should(Equal(1))
+			Ω(value[0]).Should(Equal("2"))
+
+		})
+
 	})
 
 })
