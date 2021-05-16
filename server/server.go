@@ -118,8 +118,7 @@ func checkAlive(signalCh chan bool) {
 		for name, url := range nodes {
 			_, err := http.Get(fmt.Sprintf("%s/ping", url))
 			if err != nil {
-				log.Info().Str(name, url).Msgf("failed healthcheck removing from list of nodes")
-
+				log.Info().Str(name, url).Msgf("failed healthcheck removing from list of nodes: %s", err)
 				delete(nodes, name)
 				continue
 			}
