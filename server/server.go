@@ -8,13 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 )
 
 type Server struct {
-	Name string
-	URL  string
+	Name       string
+	URL        string
+	CheckAlive time.Duration
 
 	router  *gin.Engine
 	signals chan bool
@@ -32,8 +32,13 @@ type PingResponse struct {
 	Name string `json:"string"`
 }
 
-func New(name, url, existingNodes string) (server *Server) {
+func New(name, url string) (server *Server) {
 	r := gin.Default()
+
+	server = &Server{
+		router: r,
+	}
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, PingResponse{Name: name})
 	})
@@ -42,19 +47,25 @@ func New(name, url, existingNodes string) (server *Server) {
 		c.JSON(200, nodes)
 	})
 
-	r.POST("/node", func(c *gin.Context) {
+	r.POST("/nodes", func(c *gin.Context) {
 		message := AddNodeRequest{}
 		c.Bind(&message)
+
+		err := server.register(message.URL)
+		if err != nil {
+			log.Info().Str("url", url).Msgf("adding broker failed: %s", err)
+			c.JSON(400, "request failed")
+			return
+		}
+
 		nodes[message.Name] = message.URL
 		c.JSON(200, nodes)
 	})
-	server = &Server{
-		router: r,
-	}
+
 	return
 }
 
-func (s *Server) register(existingNodes string) (err error) {
+func (s *Server) register(node string) (err error) {
 
 	addNodeRequest := AddNodeRequest{
 		Name: s.Name,
@@ -66,32 +77,34 @@ func (s *Server) register(existingNodes string) (err error) {
 		return
 	}
 
-	split := strings.Split(existingNodes, ",")
-	for _, url := range split {
-		var resp *http.Response
-		resp, err = http.Post(url, "application/json", bytes.NewBuffer(data))
-		if err != nil {
-			return
-		}
-		if resp.StatusCode != 200 {
-			log.Info().Str("url", url).Msg("failed to register with node")
-			continue
-		}
+	url := fmt.Sprintf("%s/nodes", node)
 
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Info().Str("url", url).Msg("failed to read body")
-			continue
-		}
-		result := PingResponse{}
-		err = json.Unmarshal(body, &result)
-		if err != nil {
-			log.Info().Str("url", url).Msg("failed to parse response")
-			continue
-		}
+	var resp *http.Response
+	resp, err = http.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
 
-		nodes[result.Name] = url
-		resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.Info().Str("url", url).Msg("failed to register with node")
+		return
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Info().Str("url", url).Msg("failed to read body")
+		return
+	}
+	result := map[string]string{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		log.Info().Str("url", url).Msg("failed to parse response")
+		return
+	}
+
+	for k, v := range result {
+		nodes[k] = v
 	}
 
 	return
@@ -99,7 +112,11 @@ func (s *Server) register(existingNodes string) (err error) {
 
 func (s *Server) Start() {
 
-	go checkAlive(s.signals)
+	duration := s.CheckAlive
+	if duration == 0 {
+		duration = time.Minute
+	}
+	go checkAlive(duration, s.signals)
 	s.router.Run()
 }
 
@@ -107,22 +124,28 @@ func (s *Server) Stop() {
 	s.signals <- true
 }
 
-func checkAlive(signalCh chan bool) {
+func checkAlive(duration time.Duration, signalCh chan bool) {
 
 	for {
 		select {
 		case <-signalCh:
 			return
-		case <-time.After(time.Minute):
+		case <-time.After(duration):
 		}
+
+		total := 0
 		for name, url := range nodes {
+			log.Debug().Str(name, url).Msg("checking ")
 			_, err := http.Get(fmt.Sprintf("%s/ping", url))
 			if err != nil {
 				log.Info().Str(name, url).Msgf("failed healthcheck removing from list of nodes: %s", err)
 				delete(nodes, name)
 				continue
 			}
+			total = total + 1
 		}
+
+		log.Info().Int("count", total).Msg("check alive finished")
 
 	}
 }
