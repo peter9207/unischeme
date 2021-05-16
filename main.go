@@ -1,14 +1,15 @@
 package main
 
-import "fmt"
-import "github.com/peter9207/unischeme/lexer"
+import (
+	"github.com/peter9207/unischeme/server"
+	"github.com/spf13/viper"
+)
 
 func main() {
 
-	p, err := lexer.Parse(`5`)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(p)
+	viper.AutomaticEnv()
+	existingNodes := viper.GetString("NODE")
+	// prot := viper.GetInt("PORT")
+	s := server.New(viper.GetString("NAME"), viper.GetString("URL"), existingNodes)
+	s.Start()
 }
