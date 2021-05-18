@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -9,6 +10,8 @@ type FunctionCall struct {
 	Name   string       `json:"name"`
 	Params []Expression `json:"params"`
 }
+
+var ErrInvalidJSON = errors.New("unable to parse json object")
 
 func (i FunctionCall) Node() interface{} {
 	return i

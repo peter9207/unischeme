@@ -8,8 +8,6 @@ import (
 func main() {
 
 	viper.AutomaticEnv()
-	existingNodes := viper.GetString("NODE")
-	// prot := viper.GetInt("PORT")
-	s := server.New(viper.GetString("NAME"), viper.GetString("URL"), existingNodes)
+	s := server.New(viper.GetString("NAME"), viper.GetString("URL"))
 	s.Start()
 }

@@ -44,6 +44,23 @@ func evalFunctionDeclaration(fn FunctionDeclaration, scope map[string]ASTNode) (
 	return
 }
 
+func Eval(ast []ASTNode) (results []string, err error) {
+
+	scope := map[string]Expression{}
+	fnScope := map[string]FunctionDeclaration{}
+
+	for _, t := range ast {
+		var r []string
+		r, err = eval(t, scope, fnScope)
+		if err != nil {
+			return
+		}
+		results = append(results, r...)
+	}
+
+	return
+}
+
 func eval(t ASTNode, scope map[string]Expression, functionScope map[string]FunctionDeclaration) (results []string, err error) {
 	switch t.(type) {
 	case IntValue, StringValue:
@@ -71,22 +88,5 @@ func eval(t ASTNode, scope map[string]Expression, functionScope map[string]Funct
 	default:
 		fmt.Printf("unknown ast syntax %T, skipping...\n", t)
 	}
-	return
-}
-
-func Eval(ast []ASTNode) (results []string, err error) {
-
-	scope := map[string]Expression{}
-	fnScope := map[string]FunctionDeclaration{}
-
-	for _, t := range ast {
-		var r []string
-		r, err = eval(t, scope, fnScope)
-		if err != nil {
-			return
-		}
-		results = append(results, r...)
-	}
-
 	return
 }

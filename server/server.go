@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/peter9207/unischeme/interpreter"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
@@ -34,7 +35,6 @@ type PingResponse struct {
 
 func New(name, url string) (server *Server) {
 	r := gin.Default()
-
 	server = &Server{
 		router: r,
 	}
@@ -62,7 +62,28 @@ func New(name, url string) (server *Server) {
 		c.JSON(200, nodes)
 	})
 
+	r.POST("/do", func(c *gin.Context) {
+
+		r := InterpretRequest{}
+		c.Bind(&r)
+
+		results, err := interpreter.Eval([]interpreter.ASTNode{r.Body})
+		if err != nil {
+			log.Info().Str("url", r.URL).Msgf("do failed: %s", err)
+			c.JSON(400, gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+		c.JSON(200, results)
+	})
+
 	return
+}
+
+type InterpretRequest struct {
+	URL  string `json:"url"`
+	Body interpreter.ASTNode
 }
 
 func (s *Server) register(node string) (err error) {
@@ -135,7 +156,7 @@ func checkAlive(duration time.Duration, signalCh chan bool) {
 
 		total := 0
 		for name, url := range nodes {
-			log.Debug().Str(name, url).Msg("checking ")
+			log.Debug().Str(name, url).Msg("checking... ")
 			_, err := http.Get(fmt.Sprintf("%s/ping", url))
 			if err != nil {
 				log.Info().Str(name, url).Msgf("failed healthcheck removing from list of nodes: %s", err)
