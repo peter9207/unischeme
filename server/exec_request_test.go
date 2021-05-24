@@ -5,18 +5,21 @@ import (
 	. "github.com/onsi/gomega"
 
 	"encoding/json"
+	"github.com/peter9207/unischeme/interpreter"
 	"github.com/peter9207/unischeme/server"
 )
 
 var _ = Describe("ExecRequest", func() {
 
 	Describe("can serialize and deserialize empty scopes", func() {
+		name := "testName"
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
 		fnScope := map[string]interpreter.Expression{}
+		params := []interpreter.Value{}
 
 		It("should produce the same result", func() {
-			req, err := server.MakeExecRequest(url, varScope, fnScope)
+			req, err := server.MakeExecRequest(url, varScope, fnScope, name, params)
 			Ω(err).Should(BeNil())
 
 			data, err := json.Marshal(req)
@@ -32,17 +35,19 @@ var _ = Describe("ExecRequest", func() {
 	Describe("can serialize and deserialize value scopes", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{
-			"f": interpret.StringValue{
+			"f": interpreter.StringValue{
 				Value: "some string",
 			},
-			"g": interpret.IntValue{
-				Value: "some string",
+			"g": interpreter.IntValue{
+				Value: 5,
 			},
 		}
 		fnScope := map[string]interpreter.Expression{}
+		params := []interpreter.Value{}
+		name := "testName"
 
 		It("should produce the same result", func() {
-			req, err := server.MakeExecRequest(url, varScope, fnScope)
+			req, err := server.MakeExecRequest(url, varScope, fnScope, name, params)
 			Ω(err).Should(BeNil())
 
 			data, err := json.Marshal(req)
@@ -59,9 +64,11 @@ var _ = Describe("ExecRequest", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
 		fnScope := map[string]interpreter.Expression{}
+		params := []interpreter.Value{}
+		name := "testName"
 
 		It("should produce the same result", func() {
-			req, err := server.MakeExecRequest(url, varScope, fnScope)
+			req, err := server.MakeExecRequest(url, varScope, fnScope, name, params)
 			Ω(err).Should(BeNil())
 
 			data, err := json.Marshal(req)
