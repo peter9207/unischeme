@@ -11,14 +11,6 @@ type Value struct {
 	StringValue string `json:"string_value"`
 }
 
-type InterpretRequest struct {
-	URL      string            `json:"url"`
-	VarScope map[string]Value  `json:"var_scope"`
-	FnScope  map[string]string `json:"fn_scope"`
-	Name     string            `json:"name"`
-	Params   []Value           `json:"values"`
-}
-
 var ErrInvalidParamValue = errors.New("inavlid value in parameter")
 
 func parseValues(v Value) (e interpreter.Expression, err error) {
@@ -37,32 +29,35 @@ func parseValues(v Value) (e interpreter.Expression, err error) {
 	return
 }
 
-func exec(req InterpetRequest) (v Value, err error) {
+// func exec(req InterpretRequest) (v Value, err error) {
 
-	scope := map[string]Expression{}
+// 	scope := map[string]interpreter.Expression{}
 
-	for k, v := range req.VarScope {
-		e, err := parseValues(v)
-		if err != nil {
-			return
-		}
-		scope[k] = e
-	}
+// 	for k, v1 := range req.VarScope {
+// 		parseExpression()
+// 		var e interpreter.Expression
+// 		e, err = parseValues(v1)
+// 		if err != nil {
+// 			return
+// 		}
+// 		scope[k] = e
+// 	}
 
-	params := []Expression{}
-	for _, v := range req.Params {
-		e, err := parseValues(v)
-		if err != nil {
-			return
-		}
-		params = append(params, e)
-	}
+// 	params := []interpreter.Expression{}
+// 	for _, v := range req.Params {
+// 		var e interpreter.Expression
+// 		e, err := parseValues(v)
+// 		if err != nil {
+// 			return
+// 		}
+// 		params = append(params, e)
+// 	}
 
-	fn := interpreter.FunctionCall{
-		Name:   req.Name,
-		Params: params,
-	}
+// 	fn := interpreter.FunctionCall{
+// 		Name:   req.Name,
+// 		Params: params,
+// 	}
 
-	fn.Resolve()
+// 	fn.Resolve()
 
-}
+// }

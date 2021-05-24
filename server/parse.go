@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/peter9207/unischeme/interpreter"
@@ -9,7 +8,7 @@ import (
 
 var ErrNoType = errors.New("cannot deserialize request, no type value")
 
-func parseExpression(exp map[string]interface{}) (e expression, err error) {
+func parseExpression(exp map[string]interface{}) (e interpreter.Expression, err error) {
 
 	t, ok := exp["type"]
 	if !ok {
@@ -19,10 +18,17 @@ func parseExpression(exp map[string]interface{}) (e expression, err error) {
 
 	switch t {
 	case "identifier":
-		name, ok := exp["name"]
+		nameField, ok := exp["name"]
 		if !ok {
 			errors.New("identifier must have name field")
 			return
+		}
+
+		name, ok := nameField.(string)
+		if !ok {
+			errors.New("identifier name field must be string")
+			return
+
 		}
 
 		e = interpreter.Identifier{
@@ -33,9 +39,14 @@ func parseExpression(exp map[string]interface{}) (e expression, err error) {
 	case "functionCall":
 		f := interpreter.FunctionCall{}
 
-		f.Name, ok = exp["name"]
+		n, ok := exp["name"]
 		if !ok {
 			errors.New("functionCall must have name field")
+			return
+		}
+		f.Name, ok = n.(string)
+		if !ok {
+			errors.New("functionCall name must be string")
 			return
 		}
 
@@ -52,9 +63,10 @@ func parseExpression(exp map[string]interface{}) (e expression, err error) {
 		}
 
 		for _, v := range p1 {
-			e1, err := parseExpression(v)
+			var e1 interpreter.Expression
+			e1, err = parseExpression(v)
 			if err != nil {
-				errors.New("functionCall failed to parse params")
+				err = errors.New("functionCall failed to parse params")
 				return
 			}
 			f.Params = append(f.Params, e1)
@@ -65,24 +77,34 @@ func parseExpression(exp map[string]interface{}) (e expression, err error) {
 	case "int":
 		v, ok := exp["value"]
 		if !ok {
-			errors.New("identifier must have name field")
+			errors.New("int value must have value field")
 			return
 		}
 
+		value, ok := v.(int)
+		if !ok {
+			errors.New("int value must be int")
+		}
+
 		e = interpreter.IntValue{
-			Value: v,
+			Value: value,
 		}
 		return
 
 	case "string":
 		v, ok := exp["value"]
 		if !ok {
-			errors.New("identifier must have name field")
+			errors.New("string value must have value field")
+			return
+		}
+		value, ok := v.(string)
+		if !ok {
+			errors.New("string value must be string")
 			return
 		}
 
 		e = interpreter.StringValue{
-			Value: v,
+			Value: value,
 		}
 
 		return

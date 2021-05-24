@@ -1,7 +1,6 @@
 package interpreter
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
