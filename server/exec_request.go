@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/peter9207/unischeme/interpreter"
 )
 
@@ -112,10 +113,20 @@ func parseFunctionDeclaration(f map[string]interface{}) (decl interpreter.Functi
 
 	p, ok := f["params"]
 	if ok {
-		decl.Params, ok = p.([]string)
+		list, ok := p.([]interface{})
 		if !ok {
-			err = errors.New("funciton delcaration params must be a string list")
+			err = fmt.Errorf("funciton delcaration params must be a string list got %T", p)
 			return
+		}
+		for _, v := range list {
+
+			a, ok := v.(string)
+			if !ok {
+				err = fmt.Errorf("funciton delcaration params must be a string list got %T", a)
+				return
+			}
+			decl.Params = append(decl.Params, a)
+
 		}
 	}
 

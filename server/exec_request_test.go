@@ -64,7 +64,13 @@ var _ = Describe("ExecRequest", func() {
 	Describe("can serialize and deserialize value scopes", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
-		fnScope := map[string]interpreter.FunctionDeclaration{}
+		fnScope := map[string]interpreter.FunctionDeclaration{
+			"foo": interpreter.FunctionDeclaration{
+				Name:       "testname",
+				Params:     []string{"a", "b"},
+				Definition: interpreter.IntValue{Value: 5},
+			},
+		}
 		params := []interpreter.Value{}
 		name := "testName"
 
