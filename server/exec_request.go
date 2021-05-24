@@ -6,7 +6,31 @@ import (
 	"github.com/peter9207/unischeme/interpreter"
 )
 
-func MakeExecRequest(url string, varScope map[string]interpreter.Value, fnScope map[string]interpreter.Expression, name string, params []interpreter.Value) (req ExecRequest, err error) {
+func MakeExecRequest(url string, varScope map[string]interpreter.Value, fnScope map[string]interpreter.FunctionDeclaration, name string, params []interpreter.Value) (req ExecRequest, err error) {
+
+	req.URL = url
+	req.Name = name
+
+	for _, v := range params {
+		value := Value{}
+		switch v.(type) {
+		case interpreter.IntValue:
+			s := v.(interpreter.IntValue)
+			value.Type = "int"
+			value.IntValue = s.Value
+		case interpreter.StringValue:
+			s := v.(interpreter.StringValue)
+			value.Type = "string"
+			value.StringValue = s.Value
+		default:
+			err = errors.New("unknonw interpreterValue type")
+			return
+		}
+		req.Params = append(req.Params, value)
+	}
+
+	req.FnScope = fnScope
+
 	return
 }
 
@@ -33,12 +57,10 @@ func (req *ExecRequest) UnmarshalJSON(b []byte) (err error) {
 		return
 	}
 
-	req = &ExecRequest{
-		URL:      ir.URL,
-		VarScope: ir.VarScope,
-		Name:     ir.Name,
-		Params:   ir.Params,
-	}
+	req.URL = ir.URL
+	req.VarScope = ir.VarScope
+	req.Name = ir.Name
+	req.Params = ir.Params
 
 	data := map[string]interface{}{}
 	err = json.Unmarshal(b, &data)
@@ -46,6 +68,7 @@ func (req *ExecRequest) UnmarshalJSON(b []byte) (err error) {
 		return
 	}
 
+	req.FnScope = map[string]interpreter.FunctionDeclaration{}
 	fnScopeData, ok := data["fn_scope"]
 	if !ok {
 		return

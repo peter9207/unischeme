@@ -15,7 +15,7 @@ var _ = Describe("ExecRequest", func() {
 		name := "testName"
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
-		fnScope := map[string]interpreter.Expression{}
+		fnScope := map[string]interpreter.FunctionDeclaration{}
 		params := []interpreter.Value{}
 
 		It("should produce the same result", func() {
@@ -35,6 +35,7 @@ var _ = Describe("ExecRequest", func() {
 	Describe("can serialize and deserialize value scopes", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{
+
 			"f": interpreter.StringValue{
 				Value: "some string",
 			},
@@ -42,7 +43,7 @@ var _ = Describe("ExecRequest", func() {
 				Value: 5,
 			},
 		}
-		fnScope := map[string]interpreter.Expression{}
+		fnScope := map[string]interpreter.FunctionDeclaration{}
 		params := []interpreter.Value{}
 		name := "testName"
 
@@ -63,7 +64,7 @@ var _ = Describe("ExecRequest", func() {
 	Describe("can serialize and deserialize value scopes", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
-		fnScope := map[string]interpreter.Expression{}
+		fnScope := map[string]interpreter.FunctionDeclaration{}
 		params := []interpreter.Value{}
 		name := "testName"
 
