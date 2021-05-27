@@ -17,11 +17,11 @@ func MakeExecRequest(url string, varScope map[string]interpreter.Value, fnScope 
 		switch v.(type) {
 		case interpreter.IntValue:
 			s := v.(interpreter.IntValue)
-			value.Type = "int"
+			value.Type = "intValue"
 			value.IntValue = s.Value
 		case interpreter.StringValue:
 			s := v.(interpreter.StringValue)
-			value.Type = "string"
+			value.Type = "stringValue"
 			value.StringValue = s.Value
 		default:
 			err = errors.New("unknonw interpreterValue type")

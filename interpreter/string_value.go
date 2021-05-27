@@ -1,7 +1,23 @@
 package interpreter
 
+import (
+	"encoding/json"
+)
+
 type StringValue struct {
 	Value string `json:"value"`
+}
+
+func (f StringValue) MarshalJSON() (data []byte, err error) {
+
+	i := map[string]interface{}{
+		"value": f.Value,
+		"type":  f.Type(),
+	}
+
+	data, err = json.Marshal(i)
+
+	return
 }
 
 func (i StringValue) Node() interface{} {

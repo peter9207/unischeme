@@ -24,6 +24,7 @@ type Value interface {
 	String() string
 	Type() string
 	Resolve(map[string]Expression, map[string]FunctionDeclaration) (Value, error)
+	MarshalJSON() ([]byte, error)
 }
 
 func Exec(program lexer.Program) (result []string, err error) {
@@ -39,10 +40,10 @@ func Exec(program lexer.Program) (result []string, err error) {
 var ErrCannotParseValue = errors.New("cannot parse value")
 var ErrUndefinedIdentifier = errors.New("undefined identifier")
 
-func evalFunctionDeclaration(fn FunctionDeclaration, scope map[string]ASTNode) (err error) {
-	scope[fn.Name] = fn
-	return
-}
+// func evalFunctionDeclaration(fn *FunctionDeclaration, scope map[string]ASTNode) (err error) {
+// 	scope[fn.Name] = fn
+// 	return
+// }
 
 func Eval(ast []ASTNode) (results []string, err error) {
 
@@ -71,9 +72,9 @@ func eval(t ASTNode, scope map[string]Expression, functionScope map[string]Funct
 		}
 		results = append(results, result.String())
 
-	case FunctionDeclaration:
-		fn := t.(FunctionDeclaration)
-		functionScope[fn.Name] = fn
+	case *FunctionDeclaration:
+		fn := t.(*FunctionDeclaration)
+		functionScope[fn.Name] = *fn
 
 	case FunctionCall:
 		fn := t.(FunctionCall)

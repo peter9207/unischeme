@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"encoding/json"
+	"fmt"
 	"github.com/peter9207/unischeme/interpreter"
 	"github.com/peter9207/unischeme/server"
 )
@@ -35,7 +36,6 @@ var _ = Describe("ExecRequest", func() {
 	Describe("can serialize and deserialize value scopes", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{
-
 			"f": interpreter.StringValue{
 				Value: "some string",
 			},
@@ -43,6 +43,7 @@ var _ = Describe("ExecRequest", func() {
 				Value: 5,
 			},
 		}
+
 		fnScope := map[string]interpreter.FunctionDeclaration{}
 		params := []interpreter.Value{}
 		name := "testName"
@@ -54,6 +55,9 @@ var _ = Describe("ExecRequest", func() {
 			data, err := json.Marshal(req)
 			Ω(err).Should(BeNil())
 
+			fmt.Println(string(data))
+			fmt.Println(varScope)
+
 			actual := server.ExecRequest{}
 			err = json.Unmarshal(data, &actual)
 			Ω(err).Should(BeNil())
@@ -61,7 +65,7 @@ var _ = Describe("ExecRequest", func() {
 		})
 	})
 
-	Describe("can serialize and deserialize value scopes", func() {
+	Describe("can serialize and deserialize function scope", func() {
 		url := "testurl"
 		varScope := map[string]interpreter.Value{}
 		fnScope := map[string]interpreter.FunctionDeclaration{

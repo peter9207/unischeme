@@ -74,24 +74,25 @@ func parseExpression(exp map[string]interface{}) (e interpreter.Expression, err 
 		e = f
 		return
 
-	case "int":
+	case "intValue":
+
 		v, ok := exp["value"]
 		if !ok {
 			errors.New("int value must have value field")
 			return
 		}
 
-		value, ok := v.(int)
+		n, ok := v.(float64)
 		if !ok {
 			errors.New("int value must be int")
 		}
 
 		e = interpreter.IntValue{
-			Value: value,
+			Value: int(n),
 		}
 		return
 
-	case "string":
+	case "stringValue":
 		v, ok := exp["value"]
 		if !ok {
 			errors.New("string value must have value field")
@@ -100,7 +101,7 @@ func parseExpression(exp map[string]interface{}) (e interpreter.Expression, err 
 		value, ok := v.(string)
 		if !ok {
 			errors.New("string value must be string")
-			return
+
 		}
 
 		e = interpreter.StringValue{

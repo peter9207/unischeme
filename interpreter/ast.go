@@ -53,7 +53,8 @@ func parseExpression(e lexer.Expression) (result ASTNode, err error) {
 	return
 }
 
-func parseFunctionDeclaration(fn *lexer.FnCall) (f FunctionDeclaration, err error) {
+func parseFunctionDeclaration(fn *lexer.FnCall) (f *FunctionDeclaration, err error) {
+	f = &FunctionDeclaration{}
 	if len(fn.Parameters) != 2 {
 		err = ErrFnDeclarationWrongParameterCount
 		return

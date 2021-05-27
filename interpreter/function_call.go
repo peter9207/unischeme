@@ -1,6 +1,7 @@
 package interpreter
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -22,6 +23,19 @@ func (i FunctionCall) Type() string {
 
 func (i FunctionCall) Children() []ASTNode {
 	return []ASTNode{}
+}
+
+func (f *FunctionCall) MarshalJSON() (data []byte, err error) {
+
+	i := map[string]interface{}{
+		"name":   f.Name,
+		"params": f.Params,
+		"type":   f.Type(),
+	}
+
+	data, err = json.Marshal(i)
+
+	return
 }
 
 func (fn FunctionCall) Resolve(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
