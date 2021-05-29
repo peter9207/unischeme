@@ -49,7 +49,7 @@ var _ = Describe("Parsing lexer to AST", func() {
 
 			n := nodes[0]
 			Ω(n.Type()).Should(Equal("functionDeclaration"))
-			fnNode, ok := n.(interpreter.FunctionDeclaration)
+			fnNode, ok := n.(*interpreter.FunctionDeclaration)
 
 			Ω(ok).Should(Equal(true))
 			Ω(fnNode.Name).Should(Equal("foo"))
