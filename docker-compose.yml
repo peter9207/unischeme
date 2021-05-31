@@ -2,6 +2,8 @@ version: "3.9"
 services:
   one:
     image: unischeme:latest
+    build:
+      context: .
     ports: 
       - 5000:5000
     environment:
@@ -10,8 +12,10 @@ services:
       - URL="one:5000"
     networks:
       - unischeme
-  two: 
+  two:
     image: unischeme:latest
+    build: 
+      context: .
     ports: 
       - 5001:5000
     environment:

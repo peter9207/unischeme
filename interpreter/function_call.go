@@ -34,7 +34,6 @@ func (f *FunctionCall) MarshalJSON() (data []byte, err error) {
 	}
 
 	data, err = json.Marshal(i)
-
 	return
 }
 

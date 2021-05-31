@@ -17,10 +17,9 @@ type Server struct {
 	Name       string
 	URL        string
 	CheckAlive time.Duration
-
-	router  *gin.Engine
-	signals chan bool
-	port    int
+	router     *gin.Engine
+	signals    chan bool
+	port       int
 }
 
 var nodes = map[string]string{}
