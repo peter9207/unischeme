@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/peter9207/unischeme/interpreter"
+	"github.com/peter9207/unischeme/lexer"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
@@ -31,6 +32,84 @@ type AddNodeRequest struct {
 
 type PingResponse struct {
 	Name string `json:"string"`
+}
+
+type Program struct {
+	main         interpreter.Expression
+	declarations []interpreter.FunctionDeclaration
+}
+
+func Interpret(c *gin.Context) {
+
+	var data string
+	err := c.Bind(&data)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	lexed, err := lexer.Parse(data)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ast, err := interpreter.ToAST(lexed.Expressions)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var p Program
+
+	for _, v := range ast {
+
+		fn, ok := v.(*interpreter.FunctionDeclaration)
+		if ok {
+			p.declarations = append(p.declarations, *fn)
+		}
+
+		exp, ok := v.(interpreter.Expression)
+		if ok {
+			if p.main != nil {
+				c.JSON(400, gin.H{
+					"error": "can only have 1 main method",
+				})
+				return
+			}
+			p.main = exp
+		}
+	}
+
+	varScope := make(map[string]interpreter.Expression)
+	fnScope := make(map[string]interpreter.FunctionDeclaration)
+
+	for _, d := range p.declarations {
+		err = d.Perform(varScope, fnScope)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	v, err := p.main.Resolve(varScope, fnScope)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	c.JSON(200, v)
+	return
+
 }
 
 func New(name, url string) (server *Server) {

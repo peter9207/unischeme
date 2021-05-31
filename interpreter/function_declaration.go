@@ -20,9 +20,9 @@ func (f *FunctionDeclaration) Children() []ASTNode {
 	return []ASTNode{}
 }
 
-func (f *FunctionDeclaration) Perform(scope map[string]ASTNode) error {
-	scope[f.Name] = f
-	return nil
+func (f *FunctionDeclaration) Perform(varScope map[string]Expression, fnScope map[string]FunctionDeclaration) (err error) {
+	fnScope[f.Name] = *f
+	return
 }
 
 func (f *FunctionDeclaration) MarshalJSON() (data []byte, err error) {
