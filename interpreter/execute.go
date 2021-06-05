@@ -40,11 +40,6 @@ func Exec(program lexer.Program) (result []string, err error) {
 var ErrCannotParseValue = errors.New("cannot parse value")
 var ErrUndefinedIdentifier = errors.New("undefined identifier")
 
-// func evalFunctionDeclaration(fn *FunctionDeclaration, scope map[string]ASTNode) (err error) {
-// 	scope[fn.Name] = fn
-// 	return
-// }
-
 func Eval(ast []ASTNode) (results []string, err error) {
 
 	scope := map[string]Expression{}

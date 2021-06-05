@@ -17,7 +17,7 @@ type Server struct {
 	Name       string
 	URL        string
 	CheckAlive time.Duration
-	router     *gin.Engine
+	Router     *gin.Engine
 	signals    chan bool
 	port       int
 }
@@ -114,7 +114,7 @@ func Interpret(c *gin.Context) {
 func New(name, url string) (server *Server) {
 	r := gin.Default()
 	server = &Server{
-		router: r,
+		Router: r,
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -216,7 +216,7 @@ func (s *Server) Start() {
 		duration = time.Minute
 	}
 	go checkAlive(duration, s.signals)
-	s.router.Run()
+	s.Router.Run()
 }
 
 func (s *Server) Stop() {
