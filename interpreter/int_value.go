@@ -17,10 +17,21 @@ func (f IntValue) MarshalJSON() (data []byte, err error) {
 	}
 
 	data, err = json.Marshal(i)
-
 	return
 }
 
+func (f IntValue) UnmarshalJSON() (data []byte, err error) {
+
+	i := map[string]interface{}{}
+
+	err = json.Unmarshal(data, &i)
+	if err != nil {
+		return
+	}
+
+	// data, err = json.Marshal(i)
+	return
+}
 func (i IntValue) Node() interface{} {
 	return i
 }

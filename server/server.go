@@ -139,11 +139,26 @@ func New(name, url string) (server *Server) {
 		nodes[message.Name] = message.URL
 		c.JSON(200, nodes)
 	})
+	r.POST("/interpret", Interpret)
 
 	r.POST("/do", func(c *gin.Context) {
 
 		r := InterpretRequest{}
-		c.Bind(&r)
+
+		var input map[string]interface{}
+		data, err := ioutil.ReadAll(c.Request.Body)
+		fmt.Println(string(data))
+
+		err = json.Unmarshal(data, &input)
+
+		if err != nil {
+			c.JSON(400, gin.H{
+				"Error": err.Error(),
+			})
+			return
+		}
+
+		fmt.Println("input", input)
 
 		results, err := interpreter.Eval([]interpreter.ASTNode{r.Body})
 		if err != nil {
@@ -157,11 +172,6 @@ func New(name, url string) (server *Server) {
 	})
 
 	return
-}
-
-type InterpretRequest struct {
-	URL  string `json:"url"`
-	Body interpreter.ASTNode
 }
 
 func (s *Server) register(node string) (err error) {
