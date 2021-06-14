@@ -40,8 +40,24 @@ type Program struct {
 
 func Interpret(c *gin.Context) {
 
-	var data string
-	err := c.Bind(&data)
+	data, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	fmt.Println("data", c.Request.Body)
+	fmt.Println("data", data)
+	if len(data) == 0 {
+		c.JSON(400, gin.H{
+			"error": "data cannot be empty",
+		})
+		return
+
+	}
+
+	lexed, err := lexer.Parse(string(data))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
@@ -49,7 +65,7 @@ func Interpret(c *gin.Context) {
 		return
 	}
 
-	lexed, err := lexer.Parse(data)
+	program, err := interpreter.ToProgram(lexed.Expressions)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
@@ -57,49 +73,7 @@ func Interpret(c *gin.Context) {
 		return
 	}
 
-	ast, err := interpreter.ToAST(lexed.Expressions)
-	if err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	var p Program
-
-	for _, v := range ast {
-
-		fn, ok := v.(*interpreter.FunctionDeclaration)
-		if ok {
-			p.declarations = append(p.declarations, *fn)
-		}
-
-		exp, ok := v.(interpreter.Expression)
-		if ok {
-			if p.main != nil {
-				c.JSON(400, gin.H{
-					"error": "can only have 1 main method",
-				})
-				return
-			}
-			p.main = exp
-		}
-	}
-
-	varScope := make(map[string]interpreter.Expression)
-	fnScope := make(map[string]interpreter.FunctionDeclaration)
-
-	for _, d := range p.declarations {
-		err = d.Perform(varScope, fnScope)
-		if err != nil {
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	v, err := p.main.Resolve(varScope, fnScope)
+	v, err := program.Eval()
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
@@ -143,32 +117,32 @@ func New(name, url string) (server *Server) {
 
 	r.POST("/do", func(c *gin.Context) {
 
-		r := InterpretRequest{}
+		// 	r := InterpretRequest{}
 
-		var input map[string]interface{}
-		data, err := ioutil.ReadAll(c.Request.Body)
-		fmt.Println(string(data))
+		// 	var input map[string]interface{}
+		// 	data, err := ioutil.ReadAll(c.Request.Body)
+		// 	fmt.Println(string(data))
 
-		err = json.Unmarshal(data, &input)
+		// 	err = json.Unmarshal(data, &input)
 
-		if err != nil {
-			c.JSON(400, gin.H{
-				"Error": err.Error(),
-			})
-			return
-		}
+		// 	if err != nil {
+		// 		c.JSON(400, gin.H{
+		// 			"Error": err.Error(),
+		// 		})
+		// 		return
+		// 	}
 
-		fmt.Println("input", input)
+		// 	fmt.Println("input", input)
 
-		results, err := interpreter.Eval([]interpreter.ASTNode{r.Body})
-		if err != nil {
-			log.Info().Str("url", r.URL).Msgf("do failed: %s", err)
-			c.JSON(400, gin.H{
-				"Error": err.Error(),
-			})
-			return
-		}
-		c.JSON(200, results)
+		// 	results, err := interpreter.Eval([]interpreter.ASTNode{r.Body})
+		// 	if err != nil {
+		// 		log.Info().Str("url", r.URL).Msgf("do failed: %s", err)
+		// 		c.JSON(400, gin.H{
+		// 			"Error": err.Error(),
+		// 		})
+		// 		return
+		// 	}
+		// 	c.JSON(200, results)
 	})
 
 	return

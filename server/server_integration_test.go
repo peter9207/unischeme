@@ -1,16 +1,17 @@
 package server_test
 
 import (
-	"bytes"
-	"encoding/json"
+	// "bytes"
+	// "encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/peter9207/unischeme/interpreter"
-	"github.com/peter9207/unischeme/lexer"
+	// "github.com/peter9207/unischeme/interpreter"
+	// "github.com/peter9207/unischeme/lexer"
 	"github.com/peter9207/unischeme/server"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 )
 
 var _ = Describe("ExecRequest", func() {
@@ -30,22 +31,9 @@ var _ = Describe("ExecRequest", func() {
 	It("handles simple requests", func() {
 		w := httptest.NewRecorder()
 
-		program := "5"
-		lexed, err := lexer.Parse(program)
-		Ω(err).Should(BeNil())
+		program := "(main 5)"
 
-		ast, err := interpreter.ToAST(lexed.Expressions)
-		Ω(err).Should(BeNil())
-
-		request := server.InterpretRequest{
-			URL:  "localhost:9092",
-			Body: ast[0],
-		}
-
-		data, err := json.Marshal(request)
-		Ω(err).Should(BeNil())
-
-		req, err := http.NewRequest("POST", "/do", bytes.NewReader(data))
+		req, err := http.NewRequest("POST", "/interpret", strings.NewReader(program))
 		Ω(err).Should(BeNil())
 		dest.Router.ServeHTTP(w, req)
 

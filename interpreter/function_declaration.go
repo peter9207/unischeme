@@ -18,8 +18,13 @@ func (f *FunctionDeclaration) Type() string {
 }
 
 func (f *FunctionDeclaration) Resolve(varScope map[string]Expression) (g Value, err error) {
-	varScope[f.Name] = *f
-	g = f
+	varScope[f.Name] = f
+
+	g = &Function{
+		Name:       f.Name,
+		Params:     f.Params,
+		Definition: f.Definition,
+	}
 	return
 }
 

@@ -12,6 +12,12 @@ type Program struct {
 	Args  []string
 }
 
+func (p Program) Eval() (v Value, err error) {
+
+	fmt.Println("p", p)
+	return p.Main.Resolve(p.Scope)
+}
+
 type Expression interface {
 	Resolve(scope map[string]Expression) (Value, error)
 	Type() string
@@ -42,20 +48,7 @@ var ErrCannotParseValue = errors.New("cannot parse value")
 var ErrUndefinedIdentifier = errors.New("undefined identifier")
 
 func Eval(program Program) (v Value, err error) {
-
-	scope := map[string]Expression{}
-	fnScope := map[string]FunctionDeclaration{}
-
-	// for _, t := range ast {
-	// 	var r []string
-	// 	r, err = eval(t, scope, fnScope)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	results = append(results, r...)
-	// }
-
-	return
+	return program.Eval()
 }
 
 func eval(t Expression, scope map[string]Expression, functionScope map[string]FunctionDeclaration) (results []string, err error) {

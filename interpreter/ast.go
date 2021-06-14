@@ -55,11 +55,7 @@ func ToProgram(expressions []lexer.Expression) (p Program, err error) {
 		}
 
 		if e.Value != nil {
-			i, err := parseValue(e.Value)
-			if err != nil {
-				return p, err
-			}
-
+			err = errors.New("orphaed value")
 			continue
 		}
 	}
