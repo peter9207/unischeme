@@ -21,10 +21,6 @@ func (i FunctionCall) Type() string {
 	return "functionCall"
 }
 
-func (i FunctionCall) Children() []ASTNode {
-	return []ASTNode{}
-}
-
 func (f *FunctionCall) MarshalJSON() (data []byte, err error) {
 
 	i := map[string]interface{}{
@@ -37,27 +33,27 @@ func (f *FunctionCall) MarshalJSON() (data []byte, err error) {
 	return
 }
 
-func (fn FunctionCall) Resolve(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
+func (fn FunctionCall) Resolve(scope map[string]Expression) (value Value, err error) {
 
 	switch fn.Name {
 	case "plus":
-		return fn.resolvePlus(scope, functionScope)
+		return fn.resolvePlus(scope)
 	case "subtract":
-		return fn.resolveMinus(scope, functionScope)
+		return fn.resolveMinus(scope)
 	default:
-		return fn.resolve(scope, functionScope)
+		return fn.resolve(scope)
 	}
 	return
 }
 
-func (fn FunctionCall) resolvePlus(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
+func (fn FunctionCall) resolvePlus(scope map[string]Expression) (value Value, err error) {
 
 	if len(fn.Params) != 2 {
 		err = fmt.Errorf("wrong number of arguments for plus %d", len(fn.Params))
 		return
 	}
 
-	v1, err := fn.Params[0].Resolve(scope, functionScope)
+	v1, err := fn.Params[0].Resolve(scope)
 	if err != nil {
 		return
 	}
@@ -67,7 +63,7 @@ func (fn FunctionCall) resolvePlus(scope map[string]Expression, functionScope ma
 		return
 	}
 
-	v2, err := fn.Params[1].Resolve(scope, functionScope)
+	v2, err := fn.Params[1].Resolve(scope)
 	if err != nil {
 		return
 	}
@@ -82,21 +78,21 @@ func (fn FunctionCall) resolvePlus(scope map[string]Expression, functionScope ma
 	return
 }
 
-func (fn FunctionCall) resolveMinus(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
+func (fn FunctionCall) resolveMinus(scope map[string]Expression) (value Value, err error) {
 
 	if len(fn.Params) != 2 {
 		err = fmt.Errorf("wrong number of arguments for subtract %d", len(fn.Params))
 		return
 	}
 
-	v1, err := fn.Params[0].Resolve(scope, functionScope)
+	v1, err := fn.Params[0].Resolve(scope)
 	n1, ok := v1.(IntValue)
 	if !ok {
 		err = fmt.Errorf("wrong argument type for subtract %T", v1)
 		return
 	}
 
-	v2, err := fn.Params[1].Resolve(scope, functionScope)
+	v2, err := fn.Params[1].Resolve(scope)
 	n2, ok := v2.(IntValue)
 	if !ok {
 		err = fmt.Errorf("wrong argument type for subtract %T", v1)
@@ -108,11 +104,17 @@ func (fn FunctionCall) resolveMinus(scope map[string]Expression, functionScope m
 	return
 }
 
-func (fn FunctionCall) resolve(scope map[string]Expression, functionScope map[string]FunctionDeclaration) (value Value, err error) {
+func (fn FunctionCall) resolve(scope map[string]Expression) (value Value, err error) {
 	name := fn.Name
-	declared, ok := functionScope[name]
+	exist, ok := scope[name]
 	if !ok {
 		err = fmt.Errorf("unindentifier identifier %s", name)
+		return
+	}
+
+	declared, ok := exist.(*Function)
+	if !ok {
+		err = fmt.Errorf("value is not a function  %s", name)
 		return
 	}
 
@@ -129,7 +131,7 @@ func (fn FunctionCall) resolve(scope map[string]Expression, functionScope map[st
 	for i := range declared.Params {
 		var v Value
 		id := declared.Params[i]
-		v, err = fn.Params[i].Resolve(scope, functionScope)
+		v, err = fn.Params[i].Resolve(scope)
 		if err != nil {
 			return
 		}
@@ -137,7 +139,7 @@ func (fn FunctionCall) resolve(scope map[string]Expression, functionScope map[st
 		nestedScope[id] = v
 	}
 
-	value, err = declared.Definition.Resolve(nestedScope, functionScope)
+	value, err = declared.Definition.Resolve(nestedScope)
 
 	return
 }

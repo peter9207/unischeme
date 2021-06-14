@@ -16,12 +16,10 @@ func (f *FunctionDeclaration) Node() interface{} {
 func (f *FunctionDeclaration) Type() string {
 	return "functionDeclaration"
 }
-func (f *FunctionDeclaration) Children() []ASTNode {
-	return []ASTNode{}
-}
 
-func (f *FunctionDeclaration) Perform(varScope map[string]Expression, fnScope map[string]FunctionDeclaration) (err error) {
-	fnScope[f.Name] = *f
+func (f *FunctionDeclaration) Resolve(varScope map[string]Expression) (g Value, err error) {
+	varScope[f.Name] = *f
+	g = f
 	return
 }
 

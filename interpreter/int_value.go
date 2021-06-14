@@ -29,7 +29,6 @@ func (f IntValue) UnmarshalJSON() (data []byte, err error) {
 		return
 	}
 
-	// data, err = json.Marshal(i)
 	return
 }
 func (i IntValue) Node() interface{} {
@@ -40,14 +39,10 @@ func (i IntValue) Type() string {
 	return "intValue"
 }
 
-func (i IntValue) Children() []ASTNode {
-	return []ASTNode{}
-}
-
 func (i IntValue) String() string {
 	return fmt.Sprintf("%v", i.Value)
 }
 
-func (i IntValue) Resolve(_ map[string]Expression, _ map[string]FunctionDeclaration) (Value, error) {
+func (i IntValue) Resolve(_ map[string]Expression) (Value, error) {
 	return i, nil
 }

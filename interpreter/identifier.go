@@ -14,9 +14,6 @@ func (i Identifier) Node() interface{} {
 func (i Identifier) Type() string {
 	return "identifier"
 }
-func (i Identifier) Children() []ASTNode {
-	return []ASTNode{}
-}
 
 func (f *Identifier) MarshalJSON() (data []byte, err error) {
 
@@ -30,7 +27,7 @@ func (f *Identifier) MarshalJSON() (data []byte, err error) {
 	return
 }
 
-func (i Identifier) Resolve(scope map[string]Expression, _ map[string]FunctionDeclaration) (value Value, err error) {
+func (i Identifier) Resolve(scope map[string]Expression) (value Value, err error) {
 
 	name := i.Name
 	declared, ok := scope[name]

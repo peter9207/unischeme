@@ -12,29 +12,61 @@ var ErrParametersMustBeIdentifiers = errors.New("parameters must be identifiers"
 var ErrFnDeclarationWrongParameterCount = errors.New("function declaration should have 2 parameters")
 var ErrInvalidFnDecl = errors.New("invalid fn declaration")
 
-func ToAST(expressions []lexer.Expression) (result []ASTNode, err error) {
+func ToProgram(expressions []lexer.Expression) (p Program, err error) {
+
 	for _, e := range expressions {
-		var t ASTNode
 
 		if e.FnCall != nil {
-			t, err = parseFunctionCall(e.FnCall)
-			if err != nil {
-				return
+
+			fn := e.FnCall
+
+			switch fn.Name.Name {
+			case "main":
+				t, err := parseFunctionCall(e.FnCall)
+				if err != nil {
+					return p, err
+				}
+				p.Main = t
+			case "def":
+
+				t, err := parseFunctionDeclaration(e.FnCall)
+				if err != nil {
+					return p, err
+				}
+				_, exists := p.Scope[t.Name]
+				if exists {
+					err = errors.New("function redeclared")
+					return p, err
+				}
+
+				p.Scope[t.Name] = t
+
 			}
-			result = append(result, t)
 			continue
 		}
 
-		t, err = parseExpression(e)
-		if err != nil {
-			return
+		if e.Identifier != nil {
+			i, err := parseIdentifier(e.Identifier)
+			if err != nil {
+				return p, err
+			}
+			p.Scope[i.Name] = i
+			continue
 		}
-		result = append(result, t)
+
+		if e.Value != nil {
+			i, err := parseValue(e.Value)
+			if err != nil {
+				return p, err
+			}
+
+			continue
+		}
 	}
 	return
 }
 
-func parseExpression(e lexer.Expression) (result ASTNode, err error) {
+func parseExpression(e lexer.Expression) (result Expression, err error) {
 	if e.Value != nil {
 		result, err = parseValue(e.Value)
 		return
@@ -89,13 +121,9 @@ func parseFunctionDeclaration(fn *lexer.FnCall) (f *FunctionDeclaration, err err
 	return
 }
 
-func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
-	if fn.Name.Name == "def" {
-		node, err = parseFunctionDeclaration(fn)
-		return
-	}
+func parseFunctionCall(fn *lexer.FnCall) (fnCall *FunctionCall, err error) {
 
-	fnCall := FunctionCall{
+	fnCall = &FunctionCall{
 		Name: fn.Name.Name,
 	}
 
@@ -113,12 +141,10 @@ func parseFunctionCall(fn *lexer.FnCall) (node ASTNode, err error) {
 
 		fnCall.Params = append(fnCall.Params, expression)
 	}
-
-	node = fnCall
 	return
 }
 
-func parseIdentifier(v *lexer.Identifier) (node Expression, err error) {
+func parseIdentifier(v *lexer.Identifier) (node Identifier, err error) {
 	node = Identifier{
 		Name: v.Name,
 	}
