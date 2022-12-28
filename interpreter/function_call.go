@@ -112,12 +112,17 @@ func (fn FunctionCall) resolve(scope map[string]Expression) (value Value, err er
 		return
 	}
 
+	fmt.Println(exist)
+
+	// fmt.Println("here?")
 	declared, ok := exist.(*Function)
 	if !ok {
-		err = fmt.Errorf("value is not a function  %s", name)
+		fmt.Println("returned error")
+		err = fmt.Errorf("value %s is not a function:   %T", name, exist)
 		return
 	}
 
+	fmt.Println("here?")
 	nestedScope := map[string]Expression{}
 	for k, v := range scope {
 		nestedScope[k] = v
@@ -138,6 +143,8 @@ func (fn FunctionCall) resolve(scope map[string]Expression) (value Value, err er
 
 		nestedScope[id] = v
 	}
+
+	fmt.Println("nestedScope", nestedScope)
 
 	value, err = declared.Definition.Resolve(nestedScope)
 

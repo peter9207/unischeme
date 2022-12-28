@@ -13,13 +13,13 @@ var ErrFnDeclarationWrongParameterCount = errors.New("function declaration shoul
 var ErrInvalidFnDecl = errors.New("invalid fn declaration")
 
 func ToProgram(expressions []lexer.Expression) (p Program, err error) {
+	p.Scope = map[string]Expression{}
 
 	for _, e := range expressions {
 
 		if e.FnCall != nil {
 
 			fn := e.FnCall
-
 			switch fn.Name.Name {
 			case "main":
 				t, err := parseFunctionCall(e.FnCall)
@@ -39,6 +39,7 @@ func ToProgram(expressions []lexer.Expression) (p Program, err error) {
 					return p, err
 				}
 
+				// fmt.Println(t)
 				p.Scope[t.Name] = t
 
 			}

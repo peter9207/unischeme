@@ -47,14 +47,11 @@ func Interpret(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Println("data", c.Request.Body)
-	fmt.Println("data", data)
 	if len(data) == 0 {
 		c.JSON(400, gin.H{
 			"error": "data cannot be empty",
 		})
 		return
-
 	}
 
 	lexed, err := lexer.Parse(string(data))

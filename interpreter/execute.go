@@ -14,8 +14,8 @@ type Program struct {
 
 func (p Program) Eval() (v Value, err error) {
 
-	fmt.Println("p", p)
-	return p.Main.Resolve(p.Scope)
+	fmt.Println("p", p.Scope)
+	return p.Main.Params[0].Resolve(p.Scope)
 }
 
 type Expression interface {
